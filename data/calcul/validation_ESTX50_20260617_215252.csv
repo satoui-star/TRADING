@@ -1,0 +1,35 @@
+capture_ts,check,cible,statut,severite,valeur,seuil,version_seuil,code_raison,contexte
+20260617_131429,couverture,20260619,pass,4,19.0,10.0,val1,COVERAGE_OK,19 points (7 calls / 12 puts)
+20260617_131429,couverture,20260626,pass,4,24.0,10.0,val1,COVERAGE_OK,24 points (12 calls / 12 puts)
+20260617_131429,couverture,20260630,pass,4,25.0,10.0,val1,COVERAGE_OK,25 points (13 calls / 12 puts)
+20260617_131429,couverture,20260703,pass,4,25.0,10.0,val1,COVERAGE_OK,25 points (13 calls / 12 puts)
+20260617_131429,couverture,20260710,pass,4,25.0,10.0,val1,COVERAGE_OK,25 points (13 calls / 12 puts)
+20260617_131429,couverture,20260717,pass,4,25.0,10.0,val1,COVERAGE_OK,25 points (13 calls / 12 puts)
+20260617_131429,convergence_solveur,global,pass,4,1.0,0.97,val1,CONV_OK,143/143 inversées
+20260617_131429,stabilite_forward,20260619,pass,4,9.68142772700384e-06,0.001,val1,FWD_OK,F=6289.58 médian=6289.52 conf=1.00
+20260617_131429,stabilite_forward,20260626,pass,4,8.66507862699303e-06,0.001,val1,FWD_OK,F=6294.49 médian=6294.44 conf=0.98
+20260617_131429,stabilite_forward,20260630,pass,4,7.815503155078384e-08,0.001,val1,FWD_OK,F=6293.72 médian=6293.72 conf=0.99
+20260617_131429,stabilite_forward,20260703,pass,4,4.010499732158874e-06,0.001,val1,FWD_OK,F=6296.32 médian=6296.30 conf=0.98
+20260617_131429,stabilite_forward,20260710,pass,4,4.2095796245846203e-07,0.001,val1,FWD_OK,F=6296.09 médian=6296.08 conf=0.99
+20260617_131429,stabilite_forward,20260717,pass,4,4.169928954990506e-07,0.001,val1,FWD_OK,F=6299.45 médian=6299.45 conf=0.99
+20260617_131429,residu_parite,20260619,pass,4,1.0988265642572828e-05,0.001,val1,PARITE_OK,"14 candidats, résidu médian 0.07 pts"
+20260617_131429,residu_parite,20260626,pass,4,1.7755225754868286e-05,0.001,val1,PARITE_OK,"24 candidats, résidu médian 0.11 pts"
+20260617_131429,residu_parite,20260630,pass,4,1.12040501463989e-05,0.001,val1,PARITE_OK,"25 candidats, résidu médian 0.07 pts"
+20260617_131429,residu_parite,20260703,pass,4,2.0097108882986826e-05,0.001,val1,PARITE_OK,"25 candidats, résidu médian 0.13 pts"
+20260617_131429,residu_parite,20260710,pass,4,1.1923924279247457e-05,0.001,val1,PARITE_OK,"22 candidats, résidu médian 0.08 pts"
+20260617_131429,residu_parite,20260717,pass,4,1.2427699520896753e-05,0.001,val1,PARITE_OK,"25 candidats, résidu médian 0.08 pts"
+20260617_131429,rmse_surface,20260619,pass,4,0.005506992794481949,0.02,val1,RMSE_OK,"svi sur 19 pts, RMSE 0.0055"
+20260617_131429,rmse_surface,20260626,pass,4,0.0024574342626548598,0.02,val1,RMSE_OK,"svi sur 24 pts, RMSE 0.0025"
+20260617_131429,rmse_surface,20260630,pass,4,0.0016427725216128161,0.02,val1,RMSE_OK,"svi sur 25 pts, RMSE 0.0016"
+20260617_131429,rmse_surface,20260703,pass,4,0.002468448950671174,0.02,val1,RMSE_OK,"svi sur 25 pts, RMSE 0.0025"
+20260617_131429,rmse_surface,20260710,pass,4,0.0021241543560232864,0.02,val1,RMSE_OK,"svi sur 25 pts, RMSE 0.0021"
+20260617_131429,rmse_surface,20260717,pass,4,0.002971455664234391,0.02,val1,RMSE_OK,"svi sur 25 pts, RMSE 0.0030"
+20260617_131429,calendrier,global,pass,4,0.0,0.0,val1,CAL_OK,0/250 points en recul de variance
+20260617_131429,greeks_diff_finies,ATM_20260630,pass,4,4.57102234675485e-06,0.001,val1,GREEK_OK,ATM 20260630 K=6300 σ=0.122 | err δ=1.0e-07 γ=1.6e-06 ν=4.6e-06
+20260617_131429,completude_scenarios,global,pass,4,35.0,35.0,val1,SCENARIO_GRILLE_OK,grille 7×5 = 35 cellules (version sc1)
+20260617_131429,continuite_collecteur,global,non_evaluable,4,,,val1,NON_EVALUABLE_DONNEES,pas de journal d'événements horodaté (Step 3) — gaps non mesurables
+20260617_131429,sante_quote_sous_jacent,global,non_evaluable,4,,,val1,NON_EVALUABLE_DONNEES,spread%/âge du quote sous-jacent non capturés au snapshot (Step 5)
+20260617_131429,reconciliation_greeks_broker,global,non_evaluable,4,,,val1,NON_EVALUABLE_DONNEES,Greeks broker (modelGreeks) non capturés — réconciliation impossible
+20260617_131429,anomalie_n_points,global,non_evaluable,4,143.0,,val1,HISTO_INSUFFISANT,0 runs passés (min 4) — nb de points retenus
+20260617_131429,anomalie_taux_convergence,global,non_evaluable,4,1.0,,val1,HISTO_INSUFFISANT,0 runs passés (min 4) — ratio de convergence
+20260617_131429,anomalie_rmse_moyen,global,non_evaluable,4,0.002861876424946413,,val1,HISTO_INSUFFISANT,0 runs passés (min 4) — RMSE surface moyen
