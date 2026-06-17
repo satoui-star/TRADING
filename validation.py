@@ -34,6 +34,7 @@ import config
 import pricing
 import surface as surf
 import forward as fwd
+import snapshot as snap
 
 
 # ===========================================================================
@@ -129,6 +130,36 @@ def check_couverture(qc, ref):
             res.append(_r("couverture", int(ech), "pass", 4, n,
                           config.VALID_COVERAGE_WARN, "COVERAGE_OK", ctx))
     return res
+
+
+def check_sante_quotes(brut, spot):
+    """Santé des quotes d'options (étape 5/14) : part des options OTM éligibles
+    dont le quote est dégradé (stale close-only, spread large, croisé, sans prix).
+    Alimenté par le market-state snapshot (snapshot.py), même chemin de code que la
+    prod. PDF : 'spread percentage and staleness'. La santé du quote du SOUS-JACENT
+    reste non évaluable (l'indice n'a pas de bid/ask capté) — voir checks_non_evaluables."""
+    if brut is None or spot is None:
+        return [_r("sante_quotes_options", "global", "non_evaluable", 4, None, None,
+                   "NON_EVALUABLE_DONNEES", "brut introuvable pour cette capture")]
+    ms = snap.construire_snapshot(brut)
+    # mêmes options OTM que le QC : put sous le spot, call au-dessus
+    otm = ms[((ms["type"] == "P") & (ms["strike"] < spot)) |
+             ((ms["type"] == "C") & (ms["strike"] >= spot))]
+    if not len(otm):
+        return [_r("sante_quotes_options", "global", "non_evaluable", 4, None, None,
+                   "NON_EVALUABLE_DONNEES", "aucune option OTM dans le snapshot")]
+    degrade = otm[otm["flag"] != "ok"]
+    ratio = len(degrade) / len(otm)
+    repartition = ", ".join(f"{f}:{c}" for f, c in degrade["flag"].value_counts().items())
+    ctx = f"{len(degrade)}/{len(otm)} OTM dégradées" + (f" ({repartition})" if repartition else "")
+    if ratio > config.SNAP_STALE_RATIO_FAIL:
+        return [_r("sante_quotes_options", "global", "fail", 2, ratio,
+                   config.SNAP_STALE_RATIO_FAIL, "QUOTES_TROP_DEGRADEES", ctx)]
+    if ratio > config.SNAP_STALE_RATIO_WARN:
+        return [_r("sante_quotes_options", "global", "warn", 3, ratio,
+                   config.SNAP_STALE_RATIO_WARN, "QUOTES_DEGRADEES", ctx)]
+    return [_r("sante_quotes_options", "global", "pass", 4, ratio,
+               config.SNAP_STALE_RATIO_WARN, "QUOTES_OK", ctx)]
 
 
 def check_convergence_solveur(brut, spot, ref):
@@ -386,6 +417,7 @@ def lancer_suite(qc, brut, spot, ref, courbe_fwd, tranches, histo):
     """Exécute tous les checks et renvoie la liste de ResultatCheck + métriques."""
     res = []
     res += check_couverture(qc, ref)
+    res += check_sante_quotes(brut, spot)
     res += check_convergence_solveur(brut, spot, ref)
     res += check_stabilite_forward(courbe_fwd, spot)
     res += check_residu_parite(courbe_fwd, spot)

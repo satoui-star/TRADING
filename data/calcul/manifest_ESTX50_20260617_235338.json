@@ -1,0 +1,58 @@
+{
+  "run_id": "20260617_131429_run",
+  "genere_le": "2026-06-17T23:53:38",
+  "environnement": "local",
+  "code_version": "estx50-vol-1.0.0",
+  "capture_ts": "20260617_131429",
+  "config_hashes": {
+    "univers": "1e1a73606d",
+    "marche": "9c1081d376",
+    "solveur": "7d9d27495e",
+    "qc": "c979e7fdea",
+    "snapshot": "ae749b9de7",
+    "forward": "06d5eddbda",
+    "surface": "eede6ed46b",
+    "scenarios": "0051541b77",
+    "validation": "f83dfa6ba7"
+  },
+  "partitions_entree": {
+    "raw_market_events": {
+      "fichier": "brut_ESTX50_20260617_131429.csv",
+      "capture_ts": "20260617_131429"
+    },
+    "positions": "positions.csv"
+  },
+  "partitions_sortie": {
+    "market_state": {
+      "fichier": "market_state_ESTX50_20260617_235315.csv",
+      "capture_ts": "20260617_131429"
+    },
+    "iv_points": {
+      "fichier": "iv_ESTX50_20260617_235320.csv",
+      "capture_ts": "20260617_131429"
+    },
+    "qc": {
+      "fichier": "qc_ESTX50_20260617_235322.csv",
+      "capture_ts": "20260617_131429"
+    },
+    "forward_curve": {
+      "fichier": "forward_ESTX50_20260617_235325.csv",
+      "capture_ts": "20260617_131429"
+    },
+    "surface_params": {
+      "fichier": "surface_params_20260617_235329.csv",
+      "capture_ts": null
+    },
+    "surface_grid": {
+      "fichier": "surface_grid_20260617_235329.csv",
+      "capture_ts": null
+    },
+    "validation": {
+      "fichier": "validation_ESTX50_20260617_235336.csv",
+      "capture_ts": "20260617_131429"
+    }
+  },
+  "sorties_manquantes": [],
+  "note_risque": "risque.py est affichage seul (pas de partition persistée) — voir known_limitations.md",
+  "statut": "success"
+}

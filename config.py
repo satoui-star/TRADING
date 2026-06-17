@@ -17,9 +17,11 @@ from pathlib import Path
 # VERSIONS DE CONFIG  (PDF : versionner chaque jeu de réglages séparément)
 # À incrémenter dès qu'on change un seuil : ça trace l'impact économique.
 # ===========================================================================
+CODE_VERSION      = "estx50-vol-1.0.0"  # version du CODE (séparée des configs) — manifeste de run
 UNIVERS_VERSION   = "u1"   # univers / découverte de contrats
 SOLVEUR_VERSION   = "s1"   # bornes + tolérances du solveur d'IV
 QC_VERSION        = "q1"   # filtres de qualité des quotes
+SNAPSHOT_VERSION  = "snap1" # construction des market-state snapshots (étape 5)
 FORWARD_VERSION   = "f1"   # moteur de forward par parité
 SURFACE_VERSION   = "v1"   # calibration SVI / fallback
 SCENARIO_VERSION  = "sc1"  # grille de chocs + paramètres VaR
@@ -30,6 +32,12 @@ SCENARIO_VERSION  = "sc1"  # grille de chocs + paramètres VaR
 IB_HOST = "127.0.0.1"
 IB_PORT = 4002          # 4002 = IB Gateway (paper) ; 7497 = TWS paper
 IB_CLIENT_ID = 1
+# --- Robustesse de session (PDF Step 1 : reconnexion + heartbeat) ---
+IB_TIMEOUT = 10            # délai max d'une tentative de connexion (s)
+IB_MAX_RETRIES = 3         # nb de tentatives avant abandon
+IB_BACKOFF_BASE = 1.0      # backoff exponentiel : base * 2^tentative (s)
+IB_BACKOFF_MAX = 30.0      # plafond du backoff (s)
+IB_HEARTBEAT_TOL_S = 30    # âge max du heartbeat pour se déclarer « sain » (SLO du PDF)
 
 # ===========================================================================
 # 2. UNIVERS / SOUS-JACENT  (étape 2)
@@ -70,6 +78,15 @@ SOLVEUR_MAX_ITER = 100  # garde-fou d'itérations
 QC_PRIX_MIN = 0.50      # sous ce prix, option trop illiquide / bruitée -> rejet
 QC_IV_MIN = 0.03        # IV plausible mini sur indice (3 %)
 QC_IV_MAX = 1.50        # IV plausible maxi sur indice (150 %)
+
+# ===========================================================================
+# 5bis. MARKET-STATE SNAPSHOTS  (étape 5, snapshot.py)
+#    PDF Step 5 : prix de référence = mid quand fiable, repli LABELLISÉ sinon ;
+#    drapeaux d'état (stale / spread large / croisé) ; jamais de repli caché.
+# ===========================================================================
+SNAP_SPREAD_LARGE_PCT = 0.25   # au-delà : quote "spread large" (cf. qc.yaml du PDF)
+SNAP_STALE_RATIO_WARN = 0.20   # > 20 % d'options stale/spread-large sur une maturité -> warn
+SNAP_STALE_RATIO_FAIL = 0.40   # > 40 %                                                -> fail
 
 # ===========================================================================
 # 6. MOTEUR DE FORWARD PAR PARITÉ  (étape 6, forward.py)

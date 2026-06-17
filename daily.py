@@ -13,10 +13,12 @@ import traceback
 # On importe le 'main' de chaque module et on les enchaîne.
 # Chaque module garde son rôle : donnees capte, calcul_iv calcule, qc filtre.
 import donnees
+import snapshot
 import calcul_iv
 import qc
 import forward
 import validation
+import manifest
 
 
 def main():
@@ -26,7 +28,7 @@ def main():
     print(f"{'='*60}\n")
 
     # Étape 1 : capture des prix bruts depuis IBKR
-    print("[daily] 1/5 — capture des prix bruts...")
+    print("[daily] 1/6 — capture des prix bruts...")
     try:
         donnees.__name__ = "__main__"  # déclenche le bloc if __name__ == "__main__"
         exec(open(donnees.__file__).read(), {"__name__": "__main__",
@@ -38,8 +40,17 @@ def main():
         traceback.print_exc()
         sys.exit(1)
 
-    # Étape 2 : calcul d'IV + Greeks sur la chaîne
-    print("\n[daily] 2/5 — calcul des IV...")
+    # Étape 2 : market-state snapshot (prix de référence + drapeaux d'état)
+    print("\n[daily] 2/6 — market-state snapshot...")
+    try:
+        snapshot.main()
+    except Exception:
+        print("[daily] échec à l'étape snapshot :")
+        traceback.print_exc()
+        sys.exit(1)
+
+    # Étape 3 : calcul d'IV + Greeks sur la chaîne
+    print("\n[daily] 3/6 — calcul des IV...")
     try:
         calcul_iv.main()
     except Exception:
@@ -47,8 +58,8 @@ def main():
         traceback.print_exc()
         sys.exit(1)
 
-    # Étape 3 : contrôle qualité (filtrage OTM)
-    print("\n[daily] 3/5 — contrôle qualité...")
+    # Étape 4 : contrôle qualité (filtrage OTM)
+    print("\n[daily] 4/6 — contrôle qualité...")
     try:
         qc.main()
     except Exception:
@@ -56,8 +67,8 @@ def main():
         traceback.print_exc()
         sys.exit(1)
 
-    # Étape 4 : forward par parité (lit le brut, persiste courbe + diagnostics)
-    print("\n[daily] 4/5 — forward par parité...")
+    # Étape 5 : forward par parité (lit le brut, persiste courbe + diagnostics)
+    print("\n[daily] 5/6 — forward par parité...")
     try:
         forward.main()
     except Exception:
@@ -65,8 +76,8 @@ def main():
         traceback.print_exc()
         sys.exit(1)
 
-    # Étape 5 : suite de validation (QA, anomalies, table de triage)
-    print("\n[daily] 5/5 — suite de validation...")
+    # Étape 6 : suite de validation (QA, anomalies, table de triage)
+    print("\n[daily] 6/6 — suite de validation...")
     try:
         validation.main()
     except Exception:
@@ -74,8 +85,18 @@ def main():
         traceback.print_exc()
         sys.exit(1)
 
+    # Manifeste de run (lineage : run_id, code_version, hashes de config, partitions)
+    print("\n[daily] archivage du manifeste de run...")
+    try:
+        manifest.main()
+    except Exception:
+        print("[daily] échec à l'étape manifest :")
+        traceback.print_exc()
+        sys.exit(1)
+
     print(f"\n[daily] capture du {horodatage} terminée.")
-    print("[daily] fichiers datés et archivés : brut_, iv_, qc_, forward_, validation_.")
+    print("[daily] fichiers datés et archivés : brut_, market_state_, iv_, qc_, "
+          "forward_, validation_, manifest_.")
 
 
 if __name__ == "__main__":

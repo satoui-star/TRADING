@@ -1,4 +1,4 @@
-# strategies.py — Bibliothèque des 6 templates de stratégies optionnelles.
+# strategies.py — Bibliothèque des 9 templates de stratégies optionnelles.
 # Chaque fonction prend (echeance, strike_atm) + paramètres spécifiques
 # et renvoie un DataFrame de positions au format de risque.py / positions.csv :
 # colonnes : echeance, strike, type ('C'/'P'), quantite (positif=long, négatif=short)
