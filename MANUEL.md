@@ -33,7 +33,8 @@ python manifest.py
 Puis, pour visualiser :
 
 ```
-streamlit run dashboard.py
+streamlit run dashboard.py     # interface interactive
+python build_report.py         # rapport HTML autonome (soutenance)
 ```
 
 C'est tout. Le détail de chaque étape est ci-dessous.
@@ -84,6 +85,7 @@ TRADING/
 ├─ historique.py      ← évolution spot / vol ATM / skew au fil des captures
 ├─ daily.py           ← orchestrateur : capture → snapshot → IV → QC → forward → validation → manifeste
 ├─ dashboard.py       ← interface Streamlit, 4 onglets (étape 15)
+├─ build_report.py    ← rapport HTML autonome « terminal quant » pour la soutenance (10 panneaux)
 │
 ├─ positions.csv      ← portefeuille à risquer (lu par risque.py et le dashboard)
 ├─ requirements.txt   ← dépendances (ib_async = capture live uniquement)
@@ -101,7 +103,8 @@ TRADING/
       ├─ surface_params_*.csv  /  surface_grid_*.csv  /  surface_points_*.csv
       ├─ validation_*.csv  /  triage_*.csv  /  qc_metrics_history_ESTX50.csv
       ├─ manifest_ESTX50_*.json
-      └─ *.html (nappes et smiles ouverts dans le navigateur)
+      ├─ rapport_dernier.html (rapport de soutenance — toujours la dernière version)
+      └─ *.html (nappes et smiles surface.py + rapport_ESTX50_*.html datés)
 ```
 
 Principe central (du PDF) : `data/` contient les **prix bruts immuables** ; `data/calcul/` contient des **analytics recalculables**. On ne réécrit jamais un brut, et on peut tout reconstruire à partir de lui.
@@ -157,6 +160,7 @@ Puis la visualisation (voir §4 et §5).
 | `python validation.py` | dernier `qc_` (+ brut, + historique) | `validation_*.csv`, `triage_*.csv`, `qc_metrics_history` | compteurs pass/warn/fail + table de triage |
 | `python historique.py` | tous les `qc_` | `historique.html` | évolution spot / vol ATM / skew |
 | `python manifest.py` | derniers artefacts | `manifest_*.json` | run_id, code_version, hashes de config, partitions, statut |
+| `python build_report.py` | derniers artefacts | `rapport_dernier.html` + `rapport_ESTX50_*.html` | 10 panneaux OK/absent/erreur, taille du fichier |
 
 Notes utiles :
 
@@ -179,6 +183,20 @@ Ouvre une page dans le navigateur (par défaut `http://localhost:8501`). Quatre 
 4. **Validation** — verdict pass/warn/fail, table de triage colorée par sévérité, métriques du run et leur tendance.
 
 Le dashboard ne capture rien : il lit les fichiers déjà présents dans `data/calcul/`. Il fonctionne donc parfaitement **sans IBKR**, du moment qu'une capture existe.
+
+### 5bis. Le rapport HTML autonome (`build_report.py`) — pour la soutenance
+
+```
+python build_report.py
+```
+
+Génère un **rapport HTML unique et autoportant** (thème sombre « terminal quant ») dans `data/calcul/` : `rapport_dernier.html` (toujours la dernière version) **plus** une copie datée `rapport_ESTX50_*.html`. Le fichier embarque Plotly : il **s'ouvre par double-clic, sans serveur ni Internet** — idéal à envoyer ou projeter.
+
+Dix panneaux, chacun rattaché à une étape du framework : synthèse (KPI), nappe SVI 3D, smiles points-vs-ajustement, structure du forward, diagnostic de parité (rejet MAD), solveur vs IBKR, risque (Greeks + P&L + VaR/ES), validation + triage, tendance QC, et lineage (manifeste). Données réelles uniquement ; un artefact manquant donne un encart « donnée absente » plutôt qu'un plantage.
+
+> Ouverture auto du navigateur : `set REPORT_AUTO_OPEN=1` (Windows) ou `$env:REPORT_AUTO_OPEN=1` (PowerShell) avant de lancer. Par défaut, le rapport est seulement écrit sur disque.
+
+Comme le dashboard, `build_report.py` ne capture rien : il lit `data/calcul/` et fonctionne **sans IBKR**.
 
 ---
 
@@ -229,6 +247,7 @@ Règle d'or : en cas de doute sur l'état, relancez la chaîne `calcul_iv → qc
 | `validation_*` / `triage_*` | analytique | tous les checks ; et seulement les warn/fail |
 | `qc_metrics_history_ESTX50.csv` | analytique | une ligne par run, pour le suivi de tendance et la baseline d'anomalie |
 | `manifest_*.json` | analytique | manifeste de run : code_version, hashes de config, partitions entrée/sortie |
+| `rapport_dernier.html` / `rapport_ESTX50_*.html` | analytique | rapport de soutenance autoportant (10 panneaux) — dernière version + copies datées |
 
 ---
 
@@ -248,9 +267,10 @@ Règle d'or : en cas de doute sur l'état, relancez la chaîne `calcul_iv → qc
 | 11-12 Greeks, risque, scénarios | `risque.py` |
 | 13 Reconstruction / historique | `daily.py`, `historique.py` |
 | 14 Validation & anomalies | `validation.py` |
-| 15 Orchestration & dashboard | `daily.py`, `dashboard.py` |
+| 15 Orchestration & dashboard | `daily.py`, `dashboard.py`, `build_report.py` |
 | 16 Documentation / handover | ce manuel, `docs/` (modules, limites, release) |
 | Tests (Partie IV.E) | `tests/` (`pytest`) |
 | Manifeste / lineage (Appendice B) | `manifest.py` |
+| Rapport de soutenance (HTML autonome) | `build_report.py` |
 
 Tout est **strategy-agnostic** : la plateforme **mesure et price** le risque ; `strategies.py` ne fait que décrire des positions, il ne décide aucun trade.
