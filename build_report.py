@@ -375,6 +375,56 @@ def panel_lineage():
 
 
 # ===========================================================================
+# Bandeau d'ouverture : verdict en une ligne + schéma de la chaîne (architecture)
+# ===========================================================================
+def flow_svg():
+    """Schéma horizontal de la chaîne, en SVG inline (net, offline, sans dépendance)."""
+    P2, ACC, TX, MUT, BD = (THEME["panel2"], THEME["accent"], THEME["text"],
+                            THEME["muted"], THEME["border"])
+    stages = [("Capture", "2–3"), ("Snapshot", "5"), ("Forward", "6"), ("IV", "8"),
+              ("Surface", "9"), ("Risque", "11–12"), ("Validation", "14")]
+    bw, bh, gap, x0, y0 = 152, 56, 30, 12, 20
+    W = x0 * 2 + len(stages) * bw + (len(stages) - 1) * gap
+    parts = [f'<svg viewBox="0 0 {W} 96" width="100%" preserveAspectRatio="xMidYMid meet" '
+             'role="img" aria-label="chaîne de traitement">']
+    for i, (name, step) in enumerate(stages):
+        x = x0 + i * (bw + gap)
+        cx = x + bw / 2
+        parts.append(f'<rect x="{x}" y="{y0}" width="{bw}" height="{bh}" rx="8" fill="{P2}" '
+                     f'stroke="{ACC}" stroke-width="1.2"/>')
+        parts.append(f'<text x="{cx}" y="{y0+24}" text-anchor="middle" fill="{TX}" '
+                     f'font-family="monospace" font-size="15" font-weight="700">{name}</text>')
+        parts.append(f'<text x="{cx}" y="{y0+42}" text-anchor="middle" fill="{MUT}" '
+                     f'font-family="sans-serif" font-size="11">Étape {step}</text>')
+        if i < len(stages) - 1:
+            ax, ax2, ay = x + bw, x + bw + gap, y0 + bh / 2
+            parts.append(f'<line x1="{ax+3}" y1="{ay}" x2="{ax2-7}" y2="{ay}" '
+                         f'stroke="{ACC}" stroke-width="1.6"/>')
+            parts.append(f'<path d="M{ax2-7},{ay-4} L{ax2-1},{ay} L{ax2-7},{ay+4} Z" fill="{ACC}"/>')
+    parts.append("</svg>")
+    return ('<div class="flow">' + "".join(parts)
+            + '<div class="cap">Chaîne déterministe — chaque sortie remonte à une capture datée ; '
+            'un manifeste de lineage est écrit à chaque run (Étape 4 / Appendice B).</div></div>')
+
+
+def build_hero():
+    """Verdict factuel (lu sur les artefacts) + schéma de la chaîne."""
+    iv = pd.read_csv(_require("iv_ESTX50_*.csv", "IV absente"))
+    val = pd.read_csv(_require("validation_ESTX50_*.csv", "validation absente"))
+    n, n_ok = len(iv), int((iv["statut"] == "ok").sum())
+    vc = val["statut"].value_counts().to_dict()
+    cal_row = val[val["check"] == "calendrier"]
+    cal_pct = float(cal_row["valeur"].iloc[0]) if len(cal_row) else float("nan")
+    cal_txt = ("0 violation d'arbitrage calendaire" if cal_pct == 0
+               else f"{cal_pct:.1f}% d'arbitrage calendaire")
+    verdict = (f"Plateforme opérationnelle de bout en bout — {n_ok}/{n} options inversées, "
+               f"{cal_txt}, validation {vc.get('pass',0)}·{vc.get('warn',0)}·{vc.get('fail',0)} "
+               "(pass·warn·fail).")
+    return (f'<div class="verdict"><span class="v-tag">VERDICT</span>{escape(verdict)}</div>'
+            + flow_svg())
+
+
+# ===========================================================================
 # Déclaration des sections + exécution sûre (une carte ne peut pas tuer le rapport)
 # ===========================================================================
 PANELS = [
@@ -483,6 +533,12 @@ border-radius:8px;padding:14px 16px}
 .placeholder{background:var(--panel2);border:1px dashed var(--border);border-radius:8px;
 padding:22px;color:var(--warn);font-size:13.5px}
 .placeholder.err{color:var(--fail)}
+.verdict{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);
+border-radius:8px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.v-tag{display:inline-block;font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;
+color:var(--bg);background:var(--accent);border-radius:5px;padding:2px 8px;margin-right:10px;letter-spacing:.04em}
+.flow{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:0 0 24px}
+.flow .cap{color:var(--muted);font-size:12px;margin-top:10px}
 footer{max-width:1280px;margin:10px auto 40px;padding:0 28px;color:var(--muted);font-size:12px}
 """
 
@@ -509,6 +565,11 @@ def construire_html():
         cards.append(html)
         statuses.append((p["anchor"], st))
 
+    try:                                  # bandeau d'ouverture (verdict + schéma)
+        hero = build_hero()
+    except Exception:
+        hero = ""
+
     nav = "".join(f'<a href="#{p["anchor"]}">{escape(p["nav"])}</a>' for p in PANELS)
     chips = (f'<span class="chip">capture {escape(cap)}</span>'
              f'<span class="chip">{escape(code)}</span>'
@@ -530,7 +591,7 @@ def construire_html():
            "<title>ESTX50 — Infrastructure de volatilité</title>"
            "<style>" + CSS + "</style>"
            "<script>" + get_plotlyjs() + "</script></head><body>"
-           + header + "<main>" + lede + "".join(cards) + "</main>" + footer
+           + header + "<main>" + lede + hero + "".join(cards) + "</main>" + footer
            + "</body></html>")
     return doc, statuses
 
